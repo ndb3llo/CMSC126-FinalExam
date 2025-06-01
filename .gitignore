@@ -1,0 +1,66 @@
+# ========================================
+# Python / Django - backend/
+# ========================================
+backend/__pycache__/
+backend/**/*.py[cod]
+backend/**/*.pyo
+backend/**/*.pyd
+backend/*.db
+backend/*.sqlite3
+backend/*.log
+backend/**/*.pot
+backend/**/*.mo
+backend/**/*.pkl
+backend/**/*.egg-info/
+backend/**/migrations/
+backend/.env
+**/.env
+backend/.venv/
+backend/venv/
+backend/env/
+backend/instance/
+backend/settings_local.py
+backend/local_settings.py
+backend/media/
+backend/staticfiles/
+backend/static/
+
+# ========================================
+# Node / Vue - frontend/
+# ========================================
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/coverage/
+frontend/*.local
+
+# Cypress
+frontend/cypress/videos/
+frontend/cypress/screenshots/
+
+# Logs
+frontend/logs/
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+
+# TypeScript
+frontend/*.tsbuildinfo
+
+# ========================================
+# Shared / Global
+# ========================================
+**/.DS_Store
+
+# IDE / Editor configs
+**/.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
