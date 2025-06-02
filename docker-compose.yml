@@ -8,11 +8,12 @@ services:
     ports:
       - "127.0.0.1:8000:8000"
     working_dir: /app
-    command: sh -c "./wait-for-it.sh db -- python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     env_file:
       - ./backend/.env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   frontend:
     build:
@@ -37,6 +38,11 @@ services:
       POSTGRES_PASSWORD: faqup_pass
     ports:
       - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "faqup_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
