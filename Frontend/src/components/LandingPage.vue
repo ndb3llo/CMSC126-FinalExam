@@ -10,16 +10,18 @@
 
     <!-- Lower Half -->
     <div class="lower-half">
-      <h1>Welcome to faqUP</h1>
-      <h2>The official UP Cebu Chatbot</h2>
+      <h1 class="welcome-text">Welcome to faqUP!</h1>
+      <h2 class="subtitle-text">The official UP Cebu Chatbot</h2>
       <button @click="$router.push('/chat')">Start Chatting</button>
     </div>
   </div>
 </template>
 
+
 <style scoped>
 .landing-container {
   height: 100vh;
+  width: 100vw;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -29,24 +31,24 @@
 /* Upper Half Image */
 .upper-half {
   flex: 1;
-  background-image: url('/UpperHalf.png');
+  background-image: url('/UpperBG.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  background-repeat: no-repeat;
+  background-repeat: repeat;
 }
 
 /* Logo Positioned Center */
 .logo-container {
   position: absolute;
-  top: 40%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 2;
 }
 
 .logo-container img {
-  width: 200px;
+  width: 400px;
   height: auto;
 }
 
@@ -72,6 +74,20 @@
   font-size: 1.5rem;
   margin: 0.5rem 0 2rem;
 }
+
+.lower-half h1.welcome-text {
+  font-size: 2.5rem;
+  margin: 0.5rem 0 0.2rem;
+  font-weight: bold;
+}
+
+.lower-half h2.subtitle-text {
+  font-size: 1.5rem;
+  margin: 0 0 2rem;
+  font-style: italic;
+  line-height: 1.2;
+}
+
 
 .lower-half button {
   background-color: #006400; /* dark green */

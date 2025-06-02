@@ -1,10 +1,10 @@
 @import './base.css';
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
 }
 
 a,
@@ -14,6 +14,20 @@ a,
   transition: 0.4s;
   padding: 3px;
 }
+
+.layout-default {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.layout-full {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+}
+
 
 @media (hover: hover) {
   a:hover {
