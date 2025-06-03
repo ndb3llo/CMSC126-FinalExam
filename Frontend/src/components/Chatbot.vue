@@ -2,12 +2,11 @@
   <div class="main-layout">
     <header class="main-header">
       <img src="/uplogo.png" alt="UP Cebu Logo" class="header-logo" />
-      <span class="header-title">UP Cebu FAQ</span>
+      <span class="header-title">faqUP</span>
     </header>
     <aside class="sidebar">
       <div class="sidebar-header">
-        <img src="/uplogo.png" alt="UP Cebu Logo" class="sidebar-logo" />
-        <span class="sidebar-appname">UP Cebu Chatbot</span>
+        <span class="sidebar-appname">Chat History</span>
       </div>
       <nav class="sidebar-nav">
         <button class="sidebar-btn active" @click="startNewChat">New Chat</button>
