@@ -1,90 +1,76 @@
 <template>
   <div class="main-layout">
-    <header class="main-header">
-      <img src="/upclogo.jpg" alt="UP Cebu Logo" class="header-logo" />
-      <span class="header-title">UP Cebu FAQ</span>
-    </header>
-    <aside class="sidebar">
+    <!-- Header -->
+    <div class="main-header">
+      <img src="/uplogo.png" class="header-logo" />
+      <span class="header-title">faqUP Chatbot</span>
+    </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
       <div class="sidebar-header">
-        <img src="/upclogo.jpg" alt="UP Cebu Logo" class="sidebar-logo" />
-        <span class="sidebar-appname">UP Cebu Chatbot</span>
+        <img src="/uplogo.png" class="sidebar-logo" />
+        <span class="sidebar-appname">faqUP</span>
       </div>
-      <nav class="sidebar-nav">
-        <input
-          v-model="searchQuery"
-          placeholder="Search chat..."
-          class="sidebar-search"
-        />
-        <button class="sidebar-btn active" @click="startNewChat">New Chat</button>
-        <div class="chat-history">
-          <div
-            v-for="(chat, index) in filteredChats"
-            :key="index"
-            class="chat-history-item"
-            :class="{ selected: index === selectedChatIndex }"
-          >
-            <span v-if="editingChatIndex !== index" @click="selectChat(index)" class="chat-title">
-              {{ chat.title }}
-            </span>
-            <input
-              v-else
-              v-model="editingTitle"
-              @keyup.enter="saveChatTitle(index)"
-              @blur="saveChatTitle(index)"
-              class="edit-chat-input"
-              :class="{ editing: editingChatIndex === index }"
-            />
-            <div class="menu-wrapper">
-              <button class="menu-btn" @click.stop="toggleMenu(index)">⋮</button>
-              <teleport to="body">
-                <div
-                  v-if="activeMenuIndex === index"
-                  class="dropdown-menu"
-                  :style="menuPosition"
-                  ref="menu"
-                >
-                  <button @click="renameChat(index)">Rename</button>
-                  <button @click="deleteChat(index)">Delete</button>
-                </div>
-              </teleport>
-            </div>
-          </div>
+      <input class="sidebar-search" v-model="searchQuery" placeholder="Search chats..." />
+      <button class="sidebar-btn" @click="startNewChat">+ New Chat</button>
+      <div class="chat-history">
+        <div
+          v-for="(chat, index) in filteredChats"
+          :key="index"
+          class="chat-history-item"
+          :class="{ selected: selectedChatIndex === index }"
+          @click="selectChat(index)"
+        >
+          <span class="chat-title">{{ chat.title }}</span>
+          <!-- ...menu code if needed... -->
         </div>
-      </nav>
-    </aside>
+      </div>
+    </div>
+    <!-- Chat Area -->
     <div class="chat-area">
-      <div class="chat-body">
-        <div class="message-container">
-          <!-- Initial bot message -->
-          <div class="message-row bot-row" v-if="messages.length === 0">
-            <img src="/upclogo.jpg" class="avatar bot-avatar" />
-            <div class="bubble bot-bubble">
-              Hi, how may I help you?
+      <transition name="fade-in">
+        <div class="chat-body" v-if="showChatArea">
+          <div class="message-container">
+            <!-- Typing indicator -->
+            <div class="message-row bot-row" v-if="botTyping">
+              <img src="/upclogo.jpg" class="avatar bot-avatar" />
+              <div class="bubble bot-bubble">
+                <span class="typing-indicator">
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </span>
+              </div>
+            </div>
+            <!-- Initial bot message -->
+            <div class="message-row bot-row" v-if="!botTyping && initialBotMessageShown && messages.length === 0">
+              <img src="/upclogo.jpg" class="avatar bot-avatar" />
+              <div class="bubble bot-bubble">
+                Hi, how may I help you?
+              </div>
+            </div>
+            <!-- Quick options only show when no messages yet and after initial bot message -->
+            <div v-if="!botTyping && initialBotMessageShown && messages.length === 0" class="quick-options">
+              <button @click="sendQuickMessage('When do classes start?')">When do classes start?</button>
+              <button @click="sendQuickMessage('How do I enroll?')">How do I enroll?</button>
+              <button @click="sendQuickMessage('What is the dress code?')">What is the dress code?</button>
+            </div>
+            <!-- Display all messages -->
+            <div v-for="(message, index) in messages" :key="index" class="message-row" :class="message.sender === 'user' ? 'user-row' : 'bot-row'">
+              <template v-if="message.sender === 'bot'">
+                <img src="/upclogo.jpg" class="avatar bot-avatar" />
+                <div class="bubble bot-bubble">{{ message.text }}</div>
+              </template>
+              <template v-else>
+                <div class="bubble user-bubble">{{ message.text }}</div>
+                <div class="avatar user-avatar">
+                  <span class="user-icon">👤</span>
+                </div>
+              </template>
             </div>
           </div>
-
-          <!-- Quick options only show when no messages yet -->
-          <div v-if="messages.length === 0" class="quick-options">
-            <button @click="sendQuickMessage('When do classes start?')">When do classes start?</button>
-            <button @click="sendQuickMessage('How do I enroll?')">How do I enroll?</button>
-            <button @click="sendQuickMessage('What is the dress code?')">What is the dress code?</button>
-          </div>
-
-          <!-- Display all messages -->
-          <div v-for="(message, index) in messages" :key="index" class="message-row" :class="message.sender === 'user' ? 'user-row' : 'bot-row'">
-            <template v-if="message.sender === 'bot'">
-              <img src="/upclogo.jpg" class="avatar bot-avatar" />
-              <div class="bubble bot-bubble">{{ message.text }}</div>
-            </template>
-            <template v-else>
-              <div class="bubble user-bubble">{{ message.text }}</div>
-              <div class="avatar user-avatar">
-                <span class="user-icon">👤</span>
-              </div>
-            </template>
-          </div>
         </div>
-      </div>
+      </transition>
       <div class="chat-input">
         <input v-model="input" @keyup.enter="sendMessage" placeholder="Ask anything" />
         <button @click="sendMessage">
@@ -110,6 +96,9 @@ export default {
       menuPosition: {},
       editingChatIndex: null,
       editingTitle: '',
+      showChatArea: false,
+      botTyping: false,
+      initialBotMessageShown: false,
     }
   },
   computed: {
@@ -213,6 +202,16 @@ export default {
   },
   mounted() {
     document.addEventListener('click', this.handleClickOutside);
+    // Show chat area after fade-in
+    setTimeout(() => {
+      this.showChatArea = true;
+      // Show typing indicator
+      this.botTyping = true;
+      setTimeout(() => {
+        this.botTyping = false;
+        this.initialBotMessageShown = true;
+      }, 1200); // Typing duration in ms
+    }, 500); // Chat area delay in ms
   },
   beforeDestroy() {
     document.removeEventListener('click', this.handleClickOutside);
@@ -588,5 +587,27 @@ export default {
 .edit-chat-input.editing {
   border-color: #7b1113;
 }
-
+.typing-indicator {
+  display: inline-block;
+  vertical-align: middle;
+}
+.typing-indicator .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin: 0 2px;
+  background: #ffe082;
+  border-radius: 50%;
+  animation: typing-bounce 1s infinite alternate;
+}
+.typing-indicator .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing-indicator .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes typing-bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-7px); }
+}
 </style>
