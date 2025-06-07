@@ -1,31 +1,65 @@
 <template>
   <div class="main-layout">
     <!-- Header -->
-    <div class="main-header">
-      <img src="/uplogo.png" class="header-logo" />
-      <span class="header-title">faqUP Chatbot</span>
-    </div>
+    <header class="main-header">
+      <img src="/upclogo.jpg" alt="UP Cebu Logo" class="header-logo" />
+      <span class="header-title">UP Cebu FAQ</span>
+    </header>
+
     <!-- Sidebar -->
-    <div class="sidebar">
+    <aside class="sidebar">
       <div class="sidebar-header">
-        <img src="/uplogo.png" class="sidebar-logo" />
-        <span class="sidebar-appname">faqUP</span>
+        <img src="/upclogo.jpg" alt="UP Cebu Logo" class="sidebar-logo" />
+        <span class="sidebar-appname">UP Cebu Chatbot</span>
       </div>
-      <input class="sidebar-search" v-model="searchQuery" placeholder="Search chats..." />
-      <button class="sidebar-btn" @click="startNewChat">+ New Chat</button>
-      <div class="chat-history">
-        <div
-          v-for="(chat, index) in filteredChats"
-          :key="index"
-          class="chat-history-item"
-          :class="{ selected: selectedChatIndex === index }"
-          @click="selectChat(index)"
-        >
-          <span class="chat-title">{{ chat.title }}</span>
-          <!-- ...menu code if needed... -->
+      <nav class="sidebar-nav">
+        <input
+          v-model="searchQuery"
+          placeholder="Search chat..."
+          class="sidebar-search"
+        />
+        <button class="sidebar-btn active" @click="startNewChat">New Chat</button>
+        <div class="chat-history">
+          <div
+            v-for="(chat, index) in filteredChats"
+            :key="index"
+            class="chat-history-item"
+            :class="{ selected: index === selectedChatIndex }"
+          >
+            <span
+              v-if="editingChatIndex !== index"
+              @click="selectChat(index)"
+              class="chat-title"
+            >
+              {{ chat.title }}
+            </span>
+            <input
+              v-else
+              v-model="editingTitle"
+              @keyup.enter="saveChatTitle(index)"
+              @blur="saveChatTitle(index)"
+              class="edit-chat-input"
+              :class="{ editing: editingChatIndex === index }"
+            />
+            <div class="menu-wrapper">
+              <button class="menu-btn" @click.stop="toggleMenu(index)">⋮</button>
+              <teleport to="body">
+                <div
+                  v-if="activeMenuIndex === index"
+                  class="dropdown-menu"
+                  :style="menuPosition"
+                  ref="menu"
+                >
+                  <button @click="renameChat(index)">Rename</button>
+                  <button @click="deleteChat(index)">Delete</button>
+                </div>
+              </teleport>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </nav>
+    </aside>
+
     <!-- Chat Area -->
     <div class="chat-area">
       <transition name="fade-in">
@@ -42,6 +76,7 @@
                 </span>
               </div>
             </div>
+
             <!-- Initial bot message -->
             <div class="message-row bot-row" v-if="!botTyping && initialBotMessageShown && messages.length === 0">
               <img src="/upclogo.jpg" class="avatar bot-avatar" />
@@ -49,14 +84,21 @@
                 Hi, how may I help you?
               </div>
             </div>
-            <!-- Quick options only show when no messages yet and after initial bot message -->
+
+            <!-- Quick options -->
             <div v-if="!botTyping && initialBotMessageShown && messages.length === 0" class="quick-options">
               <button @click="sendQuickMessage('When do classes start?')">When do classes start?</button>
               <button @click="sendQuickMessage('How do I enroll?')">How do I enroll?</button>
               <button @click="sendQuickMessage('What is the dress code?')">What is the dress code?</button>
             </div>
-            <!-- Display all messages -->
-            <div v-for="(message, index) in messages" :key="index" class="message-row" :class="message.sender === 'user' ? 'user-row' : 'bot-row'">
+
+            <!-- All messages -->
+            <div
+              v-for="(message, index) in messages"
+              :key="index"
+              class="message-row"
+              :class="message.sender === 'user' ? 'user-row' : 'bot-row'"
+            >
               <template v-if="message.sender === 'bot'">
                 <img src="/upclogo.jpg" class="avatar bot-avatar" />
                 <div class="bubble bot-bubble">{{ message.text }}</div>
@@ -71,6 +113,8 @@
           </div>
         </div>
       </transition>
+
+      <!-- Input always visible -->
       <div class="chat-input">
         <input v-model="input" @keyup.enter="sendMessage" placeholder="Ask anything" />
         <button @click="sendMessage">
