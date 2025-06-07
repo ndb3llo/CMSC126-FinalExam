@@ -10,7 +10,6 @@
         <span class="sidebar-appname">UP Cebu Chatbot</span>
       </div>
       <nav class="sidebar-nav">
-        <!-- Search bar added above New Chat -->
         <input
           v-model="searchQuery"
           placeholder="Search chat..."
@@ -104,7 +103,8 @@ export default {
     return {
       input: '',
       messages: [],
-      chats: [],           
+
+      chats: [],
       selectedChatIndex: null,
       searchQuery: '',
       activeMenuIndex: null,
@@ -140,41 +140,55 @@ export default {
       this.input = msg;
       this.sendMessage();
     },
-    sendMessage() {
+    async sendMessage() {
       const userMessage = this.input.trim();
       if (!userMessage) return;
-
       this.messages.push({ sender: 'user', text: userMessage });
       this.input = '';
 
-      setTimeout(() => {
-        this.getBotReply(userMessage);
-      }, 500);
-    },
-    getBotReply(userMessage) {
-      let botReply = '';
-
-      if (userMessage.toLowerCase().includes("enroll")) {
-        botReply = `According to the Academic Calendar for A.Y. 2025 - 2026, enrollment starts June 17 - June 21, 2025.
-
-June 17 - Students from 2022  
-June 18 - Students from 2023  
-June 19 - Students from 2024  
-June 20 - Incoming first years  
-June 21 - All year levels`;
-      } else if (userMessage.toLowerCase().includes("classes start")) {
-        botReply = "Classes for A.Y. 2025-2026 start on August 5, 2025.";
-      } else if (userMessage.toLowerCase().includes("dress code")) {
-        botReply = "UP Cebu does not have a strict dress code, but students are expected to dress appropriately and respectfully on campus.";
-      } else {
-        botReply = "I'm sorry, I can only help with enrollment, class schedules, and dress code for now.";
+      // Call backend API
+      try {
+        const response = await fetch('http://127.0.0.1:8000/chatbot_api/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_input: userMessage })
+        });
+        const data = await response.json();
+        this.messages.push({ sender: 'bot', text: data.response });
+      } catch (error) {
+        this.messages.push({ sender: 'bot', text: "Sorry, I couldn't connect to the server." });
       }
-
-      this.messages.push({ sender: 'bot', text: botReply });
 
       this.$nextTick(() => {
         const chatBody = document.querySelector('.chat-body');
-        chatBody.scrollTop = chatBody.scrollHeight;
+        if (chatBody) chatBody.scrollTop = chatBody.scrollHeight;
+      });
+    },
+    toggleMenu(index) {
+      if (this.activeMenuIndex === index) {
+        this.activeMenuIndex = null;
+        return;
+      }
+
+      this.$nextTick(() => {
+        const btn = event.currentTarget;
+        const rect = btn.getBoundingClientRect();
+        this.menuPosition = {
+          top: `${rect.bottom + 4}px`,
+          left: `${rect.left - 100}px`,
+          position: 'absolute',
+          zIndex: 9999
+        };
+        this.activeMenuIndex = index;
+      });
+    },
+    renameChat(index) {
+      this.editingChatIndex = index;
+      this.editingTitle = this.chats[index].title;
+      this.activeMenuIndex = null;
+      this.$nextTick(() => {
+        const input = document.querySelector('.edit-chat-input');
+        if (input) input.focus();
       });
     },
      toggleMenu(index) {
@@ -238,7 +252,6 @@ June 21 - All year levels`;
   }
 }
 </script>
-
 <style scoped>
 .main-layout {
   display: flex;
