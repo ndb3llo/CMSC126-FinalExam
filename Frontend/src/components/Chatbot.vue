@@ -140,7 +140,7 @@ export default {
       this.input = msg;
       this.sendMessage();
     },
-    sendMessage() {
+    async sendMessage() {
       const userMessage = this.input.trim();
       if (!userMessage) return;
 
