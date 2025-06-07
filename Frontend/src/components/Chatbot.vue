@@ -103,6 +103,7 @@ export default {
     return {
       input: '',
       messages: [],
+
       chats: [],
       selectedChatIndex: null,
       searchQuery: '',
@@ -142,7 +143,6 @@ export default {
     async sendMessage() {
       const userMessage = this.input.trim();
       if (!userMessage) return;
-
       this.messages.push({ sender: 'user', text: userMessage });
       this.input = '';
 
@@ -190,6 +190,39 @@ export default {
         const input = document.querySelector('.edit-chat-input');
         if (input) input.focus();
       });
+    },
+     toggleMenu(index) {
+      if (this.activeMenuIndex === index) {
+        this.activeMenuIndex = null;
+        return;
+      }
+
+      this.$nextTick(() => {
+        const btn = event.currentTarget;
+        const rect = btn.getBoundingClientRect();
+        this.menuPosition = {
+          top: `${rect.bottom + 4}px`,
+          left: `${rect.left - 100}px`,
+          position: 'absolute',
+          zIndex: 9999
+        };
+        this.activeMenuIndex = index;
+      });
+    },
+    renameChat(index) {
+      this.editingChatIndex = index;
+      this.editingTitle = this.chats[index].title;
+      this.activeMenuIndex = null;
+      this.$nextTick(() => {
+        const input = document.querySelector('.edit-chat-input');
+        if (input) input.focus();
+      });
+    },
+    saveChatTitle(index) {
+      if (this.editingTitle.trim()) {
+        this.chats[index].title = this.editingTitle.trim();
+      }
+      this.editingChatIndex = null;
     },
     saveChatTitle(index) {
       if (this.editingTitle.trim()) {
