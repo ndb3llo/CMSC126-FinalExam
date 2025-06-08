@@ -124,7 +124,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "cmsc-126-final-exam-mdj2dgt3h-tiredcat388s-projects.vercel.app",
+    "https://cmsc-126-final-exam-mdj2dgt3h-tiredcat388s-projects.vercel.app",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
