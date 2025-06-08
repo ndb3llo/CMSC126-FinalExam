@@ -83,6 +83,12 @@
               </div>
             </template>
           </div>
+
+          <!-- Bot typing indicator -->
+          <div v-if="botTyping" class="message-row bot-row">
+            <img src="/upclogo.jpg" class="avatar bot-avatar" />
+            <div class="bubble bot-bubble">Typing...</div>
+          </div>
         </div>
       </div>
       <div class="chat-input">
@@ -103,7 +109,6 @@ export default {
     return {
       input: '',
       messages: [],
-
       chats: [],
       selectedChatIndex: null,
       searchQuery: '',
@@ -111,6 +116,7 @@ export default {
       menuPosition: {},
       editingChatIndex: null,
       editingTitle: '',
+      botTyping: false, // <-- added for typing indicator
     }
   },
   computed: {
@@ -146,7 +152,8 @@ export default {
       this.messages.push({ sender: 'user', text: userMessage });
       this.input = '';
 
-      // Call backend API
+
+      this.botTyping = true; // Show typing indicator
       try {
         const response = await fetch('http://127.0.0.1:8000/chatbot_api/', {
           method: 'POST',
@@ -158,6 +165,8 @@ export default {
       } catch (error) {
         this.messages.push({ sender: 'bot', text: "Sorry, I couldn't connect to the server." });
       }
+
+      this.botTyping = false; // Hide typing indicator
 
       this.$nextTick(() => {
         const chatBody = document.querySelector('.chat-body');
@@ -190,39 +199,6 @@ export default {
         const input = document.querySelector('.edit-chat-input');
         if (input) input.focus();
       });
-    },
-     toggleMenu(index) {
-      if (this.activeMenuIndex === index) {
-        this.activeMenuIndex = null;
-        return;
-      }
-
-      this.$nextTick(() => {
-        const btn = event.currentTarget;
-        const rect = btn.getBoundingClientRect();
-        this.menuPosition = {
-          top: `${rect.bottom + 4}px`,
-          left: `${rect.left - 100}px`,
-          position: 'absolute',
-          zIndex: 9999
-        };
-        this.activeMenuIndex = index;
-      });
-    },
-    renameChat(index) {
-      this.editingChatIndex = index;
-      this.editingTitle = this.chats[index].title;
-      this.activeMenuIndex = null;
-      this.$nextTick(() => {
-        const input = document.querySelector('.edit-chat-input');
-        if (input) input.focus();
-      });
-    },
-    saveChatTitle(index) {
-      if (this.editingTitle.trim()) {
-        this.chats[index].title = this.editingTitle.trim();
-      }
-      this.editingChatIndex = null;
     },
     saveChatTitle(index) {
       if (this.editingTitle.trim()) {
