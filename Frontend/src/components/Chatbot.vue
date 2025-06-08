@@ -152,8 +152,8 @@ export default {
       this.messages.push({ sender: 'user', text: userMessage });
       this.input = '';
 
-      this.botTyping = true; // Show typing indicator
 
+      this.botTyping = true; // Show typing indicator
       try {
         const response = await fetch('http://127.0.0.1:8000/chatbot_api/', {
           method: 'POST',
