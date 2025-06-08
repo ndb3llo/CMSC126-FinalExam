@@ -155,7 +155,7 @@ export default {
 
       this.botTyping = true; // Show typing indicator
       try {
-        const response = await fetch('http://127.0.0.1:8000/chatbot_api/', {
+        const response = await fetch('https://cmsc126-finalexam-production.up.railway.app/chatbot_api/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_input: userMessage })
