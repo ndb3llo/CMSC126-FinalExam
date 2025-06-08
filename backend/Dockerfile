@@ -16,6 +16,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Run the server (can be overridden by docker-compose)
-CMD ["sh", "-c", "./wait-for-it.sh db -- python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
 
 

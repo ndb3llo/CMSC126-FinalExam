@@ -39,7 +39,7 @@ services:
     ports:
       - "127.0.0.1:5433:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "faqup_user"]
+      test: ["CMD", "pg_isready", "-U", "faqup_user", "-d", "faqup_db"]
       interval: 5s
       timeout: 5s
       retries: 5

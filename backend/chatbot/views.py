@@ -3,11 +3,12 @@ import logging
 from django.http import JsonResponse, HttpRequest
 from django.views.decorators.csrf import csrf_exempt
 from .services import send_message_to_together_ai
-from .utils.handbookloader import load_and_chunk_handbook, find_relevant_chunks
+from .utils.handbookloader import generate_chunks_with_embeddings, find_relevant_chunks
 
 logger = logging.getLogger(__name__)
 
-HANDBOOK_CHUNKS = load_and_chunk_handbook()
+# Load once on startup
+HANDBOOK_CHUNKS, HANDBOOK_EMBEDDINGS = generate_chunks_with_embeddings()
 
 @csrf_exempt
 def chatbot_api(request: HttpRequest) -> JsonResponse:
@@ -21,8 +22,12 @@ def chatbot_api(request: HttpRequest) -> JsonResponse:
         if not user_input:
             return JsonResponse({"error": "Missing or empty 'user_input' field."}, status=400)
 
-        relevant_chunks = find_relevant_chunks(user_input, HANDBOOK_CHUNKS, top_k=3)
-        context_text = "\n\n".join(relevant_chunks)
+        relevant_chunks = find_relevant_chunks(user_input, HANDBOOK_CHUNKS, HANDBOOK_EMBEDDINGS, top_k=3)
+
+        context_text = "\n\n".join(
+            f"{chunk['chapter']} > {chunk['section']} > {chunk['subsection']}\n{chunk['content']}"
+            for chunk in relevant_chunks
+        )
 
         messages = [
             {
@@ -36,7 +41,11 @@ def chatbot_api(request: HttpRequest) -> JsonResponse:
         ]
 
         ai_response = send_message_to_together_ai(messages)
-        answer = ai_response.get("choices", [{}])[0].get("message", {}).get("content", "")
+        answer = (
+            ai_response.get("choices", [{}])[0]
+            .get("message", {})
+            .get("content", "Sorry, I couldn't find an answer.")
+        )
 
         return JsonResponse({"response": answer})
 
